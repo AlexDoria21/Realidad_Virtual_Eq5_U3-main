@@ -20,7 +20,7 @@ public class LookAt : MonoBehaviour
     
     {
         float val_y = posicion_obj_a_mirar.position.y;
-        Debug.Log("" + val_y);
+       // Debug.Log("" + val_y);
 
         if(val_y>0.5f){
             transform.LookAt(new Vector3(
