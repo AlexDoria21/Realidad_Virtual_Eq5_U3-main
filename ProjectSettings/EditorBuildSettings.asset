@@ -6,12 +6,14 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/UNIDAD3/EjemploSingleton/Singleton Ejemplo 1.unity
-    guid: 821615fc2ac914604bf38e6a75ef2ada
+    path: Assets/EjemploUI/1.unity
+    guid: 30aa91e4f74dae940afab7f8a671aef6
   - enabled: 1
-    path: Assets/UNIDAD3/EjemploSingleton/Singleton Ejemplo 2.unity
-    guid: 2d9353bd5ab014022b68133790d06205
+    path: Assets/EjemploUI/2.unity
+    guid: 6809d6ff7c635154c8c9afe39eee3598
   - enabled: 1
-    path: Assets/UNIDAD3/EjemploSingleton/Singleton Ejemplo 3.unity
-    guid: d17647ecb8efb470d90a1e5be7e610c2
-  m_configObjects: {}
+    path: Assets/EjemploUI/3.unity
+    guid: a45bdb99594fbb94ab84186e1ede2096
+  m_configObjects:
+    com.unity.input.settings: {fileID: 11400000, guid: 9eb07e2d669e9c94e9d7d3c782a916f7,
+      type: 2}
