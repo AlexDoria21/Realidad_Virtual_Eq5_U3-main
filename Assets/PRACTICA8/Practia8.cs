@@ -1,89 +1,134 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
 
 public class Practia8 : MonoBehaviour
 {
-    private float tiempo = 10f;
-
-    private float tiempoFaltante;
     public GameObject tomado;
+    public Transform plancha;
     public bool isTaken;
     public bool EstaObjetoCerca;
+    public float tiempoCambioColor = 5f;
+    public TextMeshProUGUI temporizadorTexto;  // Texto UI para mostrar el temporizador
 
-    public Vector3 original_scale;
+    private Color[] colores = { Color.red, Color.green, Color.blue };
+    private Color colorPlanchaActual;
+    private Vector3 posicionInicialCubo;
+    private Vector3 original_scale;
+    private float tiempoRestante;
+    private Transform padre;
 
-    Transform padre;
-
-    private void Awake() {
+    private void Awake()
+    {
         padre = GameObject.Find("Personaje").GetComponent<Transform>();
     }
-    // Start is called before the first frame update
+
     void Start()
     {
         isTaken = false;
         EstaObjetoCerca = false;
-
-        tiempo = tiempoFaltante;
-
+        tiempoRestante = tiempoCambioColor;
+        CambiarColorPlancha();
+        ActualizarTextoTemporizador();  // Mostrar el tiempo inicial
     }
 
-    // Update is called once per frame
     void Update()
     {
-        if(Input.GetKeyDown(KeyCode.B)){
-                        if(!isTaken){
-                            isTaken = true;                                              
-                        }
-                        else{
-                            isTaken = false;
-                            
-                        }
-                    }
-        
-        if( tiempoFaltante <= 0f)
+        tiempoRestante -= Time.deltaTime;
+        ActualizarTextoTemporizador();
+
+        if (tiempoRestante <= 0f)
+        {
+            CambiarColorPlancha();
+            tiempoRestante = tiempoCambioColor;
+        }
+
+        if (Input.GetKeyDown(KeyCode.B))
+        {
+            if (!isTaken && EstaObjetoCerca)
             {
-                CompareTag("plancha");{
-                    transform.material.color
-                }
+                TomarObjeto();
             }
-    }
-        private void OnTriggerEnter(Collider other) {
-        GameObject temporal = other.gameObject;
-        if(temporal.CompareTag("ObjetoTomable")){  
-            EstaObjetoCerca = true; //variable que puede ser alterada por algun evento externo
-            //como podria ser una corrutina
+            else if (isTaken)
+            {
+                SoltarObjeto();
+            }
         }
     }
-        private void OnTriggerStay(Collider other) {
-        GameObject temporal = other.gameObject;
-        if(EstaObjetoCerca){  //si esta el objeto tomable cerca del personaje                                      
-                if(isTaken){ //y presiono la tecla de tomar
-                    original_scale = temporal.transform.localScale;
-                    tomado = temporal;    //guardo la referencia                    
-                    temporal.transform.SetParent(padre); //asocio el objeto al personaje
-                    temporal.transform.position = transform.position; //el objeto se colocara en las manos del personaje                    
-                    temporal.transform.rotation = transform.rotation; //el obj se coloque en la rotacion de las manos
-                    temporal.transform.localScale = transform.localScale; 
-                    Rigidbody rb = temporal.GetComponent<Rigidbody>();
-                    rb.isKinematic = true; //obj se vuelve kinematico 
-                    rb.useGravity = false;
-                }
-                else if(tomado!=null){                                         
-                    tomado = null;                    
-                    temporal.transform.SetParent(null);                    
-                    Rigidbody rb = temporal.GetComponent<Rigidbody>();
-                    rb.useGravity = true;
-                    rb.isKinematic = false;                    
-                    tomado.transform.localScale = original_scale;                    
-                }            
-        }
-        Debug.Log(other.gameObject.name);
+
+    private void CambiarColorPlancha()
+    {
+        int indiceColor = Random.Range(0, colores.Length);
+        colorPlanchaActual = colores[indiceColor];
+        plancha.GetComponent<Renderer>().material.color = colorPlanchaActual;
     }
-        private void OnTriggerExit(Collider other) {
-        if(other.gameObject.CompareTag("ObjetoTomable")){
+
+    private void ActualizarTextoTemporizador()
+    {
+        if (temporizadorTexto != null)
+            temporizadorTexto.text = "Tiempo: " + Mathf.Ceil(tiempoRestante).ToString(); // Mostrar tiempo restante
+    }
+
+    private void TomarObjeto()
+    {
+        isTaken = true;
+        if (tomado != null)
+        {
+            posicionInicialCubo = tomado.transform.position;
+            original_scale = tomado.transform.localScale;
+            tomado.transform.SetParent(padre);
+            tomado.transform.position = transform.position;
+            tomado.transform.rotation = transform.rotation;
+            tomado.transform.localScale = transform.localScale;
+            Rigidbody rb = tomado.GetComponent<Rigidbody>();
+            rb.isKinematic = true;
+            rb.useGravity = false;
+        }
+    }
+
+    private void SoltarObjeto()
+    {
+        isTaken = false;
+        if (tomado != null)
+        {
+            tomado.transform.SetParent(null);
+            Rigidbody rb = tomado.GetComponent<Rigidbody>();
+            rb.useGravity = true;
+            rb.isKinematic = false;
+            tomado.transform.localScale = original_scale;
+
+            if (tomado.GetComponent<Renderer>().material.color == colorPlanchaActual)
+            {
+                Debug.Log("El color coincide.");
+            }
+            else
+            {
+                Debug.Log("Colores no coinciden.");
+                tomado.transform.position = posicionInicialCubo;
+                tiempoRestante = tiempoCambioColor;
+            }
+            tomado = null;
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.CompareTag("ObjetoTomable"))
+        {
+            EstaObjetoCerca = true;
+            tomado = other.gameObject;
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.gameObject.CompareTag("ObjetoTomable"))
+        {
             EstaObjetoCerca = false;
+            if (!isTaken)
+            {
+                tomado = null;
+            }
         }
-        Debug.Log(other.gameObject.name);
     }
-    }
+}
